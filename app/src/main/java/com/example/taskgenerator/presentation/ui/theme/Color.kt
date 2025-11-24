@@ -1,4 +1,4 @@
-package com.example.taskgenerator.ui.theme
+package com.example.taskgenerator.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
