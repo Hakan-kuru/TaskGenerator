@@ -2,7 +2,7 @@ package com.example.taskgenerator.domain.model
 
 // Domain katmanında kullanılacak alt görev modeli.
 data class Sub_task(
-    val id: Int,
+    val id: Long,
     val mainTaskId: Long,         // Bu alt görevin bağlı olduğu ana görevin id'si.
     val title: String,
     val description: String? = null,

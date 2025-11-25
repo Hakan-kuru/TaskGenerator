@@ -2,7 +2,7 @@ package com.example.taskgenerator.domain.model
 
 // Domain katmanında kullanılacak ana görev modeli.
 data class Main_task(
-    val id: Int,
+    val id: Long,
     val title: String,
     val description: String? = null,
     val taskType: String,        // "done", "count", "time" gibi 3 tipten biri (db'de string tutuyorduk)

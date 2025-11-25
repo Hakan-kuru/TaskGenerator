@@ -29,7 +29,10 @@ interface Main_task_dao {
 
     // Tüm ana görevleri basit şekilde almak için
     @Query("SELECT * FROM main_task ORDER BY createdAt DESC")
-    fun getAllMainTasks(): Flow<List<Main_task_entity>>
+    fun getAllMainTasks(): Flow<List<Main_task_entity>?>
+
+    @Query("SELECT * FROM main_task WHERE mainTaskId = :id")
+    fun getMainTaskWithId(id: Long): Flow<Main_task?>
 
     // Ana görev ve alt görevlerini birlikte almak için
     @Transaction

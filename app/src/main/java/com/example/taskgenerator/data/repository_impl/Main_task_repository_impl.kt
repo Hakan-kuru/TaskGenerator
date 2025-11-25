@@ -18,15 +18,12 @@ class Main_task_repository_impl(
         // Flow<List<MainTask>>'e dönüştürmek için kullanılıyor.
         return mainTaskDao.getAllMainTasks()
             .map { entityList ->
-                entityList.map { it.toDomain() }
+                entityList?.map { it.toDomain() } ?: emptyList()
             }
     }
 
     override fun getMainTaskById(id: Long): Flow<Main_task?> {
-        return mainTaskDao.getAllMainTasks()
-            .map { entity ->
-                entity.toDomain()
-            }
+        return mainTaskDao.getMainTaskWithId(id)
     }
 
     override fun getMainTaskWithSubTasks(id: Long): Flow<Main_with_sub_tasks?> {

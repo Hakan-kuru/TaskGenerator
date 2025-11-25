@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey
 )
 data class Sub_task_entity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Long,
     var mainTaskId: Long,
     var title: String,
     var description: String,
