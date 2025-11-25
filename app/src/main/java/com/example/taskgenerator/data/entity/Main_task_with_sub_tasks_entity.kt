@@ -6,7 +6,7 @@ import androidx.room.Relation
 
 // Room'un @Relation özelliğini kullanarak
 // bir MainTask ile ona bağlı tüm SubTask'leri tek seferde almak için kullandığımız model.
-data class MainTaskWithSubTasks(
+data class Main_task_with_sub_tasks_entity(
     @Embedded
     val mainTask: Main_task_entity,
 
