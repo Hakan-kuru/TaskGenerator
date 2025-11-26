@@ -18,11 +18,8 @@ interface Main_repository {
     fun getMainTaskWithSubTasks(id: Long): Flow<Main_with_sub_tasks?>
 
     // Yeni bir main task eklemek için.
-    suspend fun insertMainTask(mainTask: Main_task)
+    suspend fun insertMainTask(mainTask: Main_task): Long
 
     // Var olan main task'i güncellemek için.
     suspend fun updateMainTask(mainTask: Main_task)
-
-    // Main task'i tamamen silmek için.
-    suspend fun deleteMainTask(mainTaskId: Long)
 }

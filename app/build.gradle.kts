@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    // Hilt plugin (ilk defa kullanıyoruz)
+    id("com.google.dagger.hilt.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -42,10 +45,15 @@ android {
 
 dependencies {
 
-    ksp("androidx.room:room-compiler:2.5.0")
-    ksp("androidx.room:room-compiler:2.8.4")
+    kapt("androidx.room:room-compiler:2.8.4")
     implementation("androidx.room:room-runtime:2.8.4")
 
+    // region Hilt (ilk defa ekleniyor)
+    val hiltVersion = "2.57.1"
+
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
+    // endregion
 
 
     implementation(libs.androidx.core.ktx)

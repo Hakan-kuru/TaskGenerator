@@ -1,5 +1,6 @@
 package com.example.taskgenerator.domain.repositories
 
+import com.example.taskgenerator.domain.model.Sub_task
 import kotlinx.coroutines.flow.Flow
 
 // SubTask'ler için domain katmanındaki repository interface.
@@ -20,11 +21,9 @@ interface Sub_repository {
     // SubTask'i tamamen silmek için.
     suspend fun deleteSubTask(subTaskId: Long)
 
-    // Tamamlandı bilgisi veya progress güncellemesi gibi,
-    // sadece state değiştirmek için kullanabileceğin yardımcı fonksiyon.
-    suspend fun updateSubTaskProgress(
+     suspend fun updateSubTaskProgress(
         subTaskId: Long,
-        isDone: Boolean? = null,
-        currentCount: Int? = null
+        isDone: Boolean?,
+        currentCount: Int?
     )
 }
