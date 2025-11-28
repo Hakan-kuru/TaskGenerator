@@ -9,5 +9,7 @@ data class Sub_task(
     val taskType: String,         // "done", "count", "time"
     val targetCount: Int? = null,
     val currentCount: Int? = null,
-    val isDone: Boolean = false
+    val isDone: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis()
 )

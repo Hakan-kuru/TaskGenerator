@@ -8,5 +8,7 @@ data class Main_task(
     val taskType: String,        // "done", "count", "time" gibi 3 tipten biri (db'de string tutuyorduk)
     val targetCount: Int? = null, // Hedef değer (sayı ya da dakika). Sadece ilgili tip için anlamlı.
     val currentCount: Int? = 0,    // Mevcut ilerleme (sayı ya da dakika).
-    val isDone: Boolean = false   // Görev tamamlandı mı?
+    val isDone: Boolean = false  ,// Görev tamamlandı mı?
+    val createdAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis()
 )

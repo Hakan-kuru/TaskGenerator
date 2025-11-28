@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -55,6 +57,8 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     // endregion
 
+    implementation("androidx.navigation:navigation-compose:2.8.0")  // versiyonunu projene göre ayarla
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

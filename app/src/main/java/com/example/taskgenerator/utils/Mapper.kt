@@ -20,7 +20,9 @@ fun Main_task_entity.toDomain(): Main_task {
         taskType = taskType.toString(),
         targetCount = targetCount,
         currentCount = currentCount,
-        isDone = isDone
+        isDone = isDone,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 
@@ -33,7 +35,9 @@ fun Main_task.toEntity(): Main_task_entity {
         taskType = taskType,
         targetCount = targetCount,
         currentCount = currentCount,
-        isDone = isDone
+        isDone = isDone,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 
@@ -47,7 +51,9 @@ fun Sub_task_entity.toDomain(): Sub_task {
         taskType = taskType.toString(),
         targetCount = targetCount,
         currentCount = currentCount,
-        isDone = isDone
+        isDone = isDone,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 
@@ -61,7 +67,9 @@ fun Sub_task.toEntity(): Sub_task_entity {
         taskType = taskType,
         targetCount = targetCount,
         currentCount = currentCount,
-        isDone = isDone
+        isDone = isDone,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 
