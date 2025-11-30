@@ -1,5 +1,4 @@
-package com.example.taskgenerator.data
-
+package com.example.taskgenerator.data.di
 
 import com.example.taskgenerator.data.repository_impl.Main_task_repository_impl
 import com.example.taskgenerator.data.repository_impl.Sub_task_repository_impl

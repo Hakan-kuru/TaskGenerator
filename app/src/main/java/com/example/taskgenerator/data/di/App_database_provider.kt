@@ -1,8 +1,8 @@
-package com.example.taskgenerator.data
+package com.example.taskgenerator.data.di
 
-import kotlin.jvm.java
 import android.content.Context
 import androidx.room.Room
+import com.example.taskgenerator.data.App_database
 
 // Uygulama içinde AppDatabase örneğini oluşturmak için basit helper.
 object App_database_provider {

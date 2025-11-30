@@ -15,6 +15,10 @@ class Main_task_repository_impl @Inject constructor(
     private val mainTaskDao: Main_task_dao
 ) : Main_repository {
 
+    override suspend fun toggleMainTaskDone(mainTaskId: Long) {
+        mainTaskDao.toggleMainTaskDone(mainTaskId)
+    }
+
     override fun getAllMainTasks(): Flow<List<Main_task>> {
         // Flow.map: Room'dan gelen Flow<List<MainTaskEntity>>'yi
         // Flow<List<MainTask>>'e dönüştürmek için kullanılıyor.
@@ -41,5 +45,13 @@ class Main_task_repository_impl @Inject constructor(
 
     override suspend fun updateMainTask(mainTask: Main_task) {
         mainTaskDao.updateMainTask(mainTask.toEntity())
+    }
+
+    override fun getAllMainTasksWithSubTasks(): Flow<List<Main_with_sub_tasks>> {
+        return mainTaskDao.getAllMainTasksWithSubTasks()
+            .map { relationList ->
+                // relationList: List<Main_task_with_sub_tasks_entity>
+                relationList.map { it.toDomain() }
+            }
     }
 }

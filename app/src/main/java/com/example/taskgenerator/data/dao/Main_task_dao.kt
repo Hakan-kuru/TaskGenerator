@@ -38,4 +38,12 @@ interface Main_task_dao {
     @Transaction
     @Query("SELECT * FROM main_task WHERE mainTaskId = :id")
     fun getMainTaskWithSubTasks(id: Long): Flow<Main_task_with_sub_tasks_entity?>
+
+
+    @Query("""
+        UPDATE main_task 
+        SET isDone = CASE WHEN isDone = 1 THEN 0 ELSE 1 END
+        WHERE mainTaskId = :mainTaskId
+    """)
+    suspend fun toggleMainTaskDone(mainTaskId: Long)
 }

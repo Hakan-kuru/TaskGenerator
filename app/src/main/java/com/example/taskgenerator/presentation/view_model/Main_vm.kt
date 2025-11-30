@@ -10,18 +10,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import com.example.taskgenerator.domain.model.Main_task
 import com.example.taskgenerator.domain.usecase.Get_main_tasks_useCase
+import com.example.taskgenerator.domain.usecase.Toggle_main_task_done_usecase
 import com.example.taskgenerator.presentation.ui.screens.Main_screen_state
-import com.example.taskgenerator.presentation.ui.screens.Main_task_ui_model
-import com.example.taskgenerator.presentation.ui.screens.Task_type_ui
 
 // @HiltViewModel: Hilt'in bu ViewModel'e constructor ile bağımlılık enjekte etmesini sağlayan anotasyon.
 @HiltViewModel
 class Main_vm @Inject constructor(
     // Bu usecase'leri kendi projendeki isimlerle değiştir.
     private val getMainTasksUseCase: Get_main_tasks_useCase,   // Tüm main task'ları getirir (Flow veya suspend)
-    private val toggleMainTaskDoneUseCase: ToggleMainTaskDoneUseCase // isDone değiştirir
+    private val toggleMainTaskDoneUseCase: Toggle_main_task_done_usecase // isDone değiştirir
 ) : ViewModel() {
 
     // MutableStateFlow: UI state'ini tutan, Compose tarafından observe edilen reaktif akış.
@@ -36,12 +34,11 @@ class Main_vm @Inject constructor(
         loadTasks()
     }
 
-    fun toggleMainTaskDone(taskId: Long, done: Boolean) {
+    fun toggleMainTaskDone(mainId: Long) {
         viewModelScope.launch {
             try {
                 toggleMainTaskDoneUseCase(
-                    taskId = taskId,
-                    isDone = done
+                    mainTaskId = mainId
                 )
                 // Başarılıysa listeyi tekrar yükleyelim
                 loadTasks()
@@ -74,7 +71,7 @@ class Main_vm @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            mainTasks = tasks.map { task -> task.toUiModel() }
+                            mainTasks = tasks.map { task -> task() }
                         )
                     }
                 }
@@ -82,31 +79,5 @@ class Main_vm @Inject constructor(
     }
 
     // Buradaki MainTask, domain katmanındaki modelin. Property isimlerini kendi modeline göre uyarla.
-    private fun Main_task.toUiModel(): Main_task_ui_model {
-        // taskType alanını string tuttuğunu söylemiştin; onu UI enum'una map ediyoruz.
-        val typeUi = when (taskType) {
-            "Count" -> Task_type_ui.Count
-            "Time" -> Task_type_ui.Time
-            "Done" -> Task_type_ui.Done
-            else -> Task_type_ui.Done
-        }
 
-        return Main_task_ui_model(
-            id = id,
-            title = title,
-            description = description.orEmpty(),
-            taskType = typeUi,
-            hasSubTasks = ,
-            doneSubTaskCount = ,
-            totalSubTaskCount = ,
-            isDone = isDone,
-            currentCount = currentCount,
-            targetCount = targetCount,
-            currentMinutes = ,
-            targetMinutes = ,
-            // Tarihi domain’de nasıl tuttuğuna göre burayı düzenle
-            startDateText = ,
-            endDateText =
-        )
-    }
 }

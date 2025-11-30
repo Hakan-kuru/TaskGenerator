@@ -22,4 +22,9 @@ interface Main_repository {
 
     // Var olan main task'i güncellemek için.
     suspend fun updateMainTask(mainTask: Main_task)
+
+    suspend fun toggleMainTaskDone(mainTaskId: Long)
+
+
+    fun getAllMainTasksWithSubTasks(): Flow<List<Main_with_sub_tasks>>
 }
