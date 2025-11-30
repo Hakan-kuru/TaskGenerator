@@ -73,6 +73,7 @@ fun Main_with_sub_tasks.toUiModel(): Main_task_ui_model {
         description = main.description.orEmpty(),
         taskType = taskTypeUi,
 
+        subTasks = subs.map { it.toUiModel() },
         hasSubTasks = hasSubTasks,
         doneSubTaskCount = doneSubTaskCount,
         totalSubTaskCount = totalSubTaskCount,

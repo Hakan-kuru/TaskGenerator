@@ -1,6 +1,16 @@
 package com.example.taskgenerator.presentation.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -8,31 +18,27 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
-// Bu data class, UI'da göstereceğimiz task modelini temsil ediyor. (UI katmanı için.)
-data class Main_task_ui_model(
-    val id: Long,
-    val title: String,
-    val description: String,
-    val taskType: Task_type_ui,
-    val hasSubTasks: Boolean,
-    val doneSubTaskCount: Int,
-    val totalSubTaskCount: Int,
-    val isDone: Boolean,
-    val currentCount: Int?,
-    val targetCount: Int?,
-    val currentMinutes: Int?,
-    val targetMinutes: Int?,
-    val startDateText: String?,
-    val endDateText: String?
-)
+import com.example.taskgenerator.presentation.ui_states.Main_task_ui_model
+import kotlin.collections.isNotEmpty
 
 // UI için kullanacağımız task type modeli.
 // DB'de string tuttun; ViewModel bu stringleri bu tipe map edebilir.
@@ -46,7 +52,8 @@ sealed class Task_type_ui(val rawValue: String) {
 data class Main_screen_state(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val mainTasks: List<Main_task_ui_model> = emptyList()
+    val upcomingOrNoDeadlineMainTasks: List<Main_task_ui_model> = emptyList(),
+    val overdueMainTasks: List<Main_task_ui_model> = emptyList()
 )
 
 /**
@@ -60,7 +67,7 @@ fun MainScreen(
     state: Main_screen_state,
     onRefresh: () -> Unit,
     onMainTaskClick: (Long) -> Unit,
-    onToggleMainTaskDone: (taskId: Long, newValue: Boolean) -> Unit,
+    onToggleMainTaskDone: (taskId: Long) -> Unit,
     onAddSubTaskClick: (mainTaskId: Long) -> Unit,
     onAddMainTaskClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -81,6 +88,10 @@ fun MainScreen(
         },
         modifier = modifier
     ) { padding ->
+
+        val isEmpty =
+            state.overdueMainTasks.isEmpty() && state.upcomingOrNoDeadlineMainTasks.isEmpty()
+
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -112,7 +123,7 @@ fun MainScreen(
                     }
                 }
 
-                state.mainTasks.isEmpty() -> {
+                isEmpty -> {
                     Column(
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -137,15 +148,50 @@ fun MainScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(state.mainTasks) { task ->
-                            MainTaskItem(
-                                task = task,
-                                onClick = { onMainTaskClick(task.id) },
-                                onToggleDone = { newValue ->
-                                    onToggleMainTaskDone(task.id, newValue)
-                                },
-                                onAddSubTaskClick = { onAddSubTaskClick(task.id) }
-                            )
+                        // Önce tarihi geçmiş görevler
+                        if (state.overdueMainTasks.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Tarihi Geçmiş Görevler",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+
+                            items(state.overdueMainTasks) { task ->
+                                MainTaskItem(
+                                    task = task,
+                                    onClick = { onMainTaskClick(task.id) },
+                                    onToggleDone = { onToggleMainTaskDone(task.id) },
+                                    onAddSubTaskClick = { onAddSubTaskClick(task.id) }
+                                )
+                            }
+                        }
+
+                        // Sonra diğerleri
+                        if (state.upcomingOrNoDeadlineMainTasks.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "Diğer Görevler",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier
+                                        .padding(top = 16.dp, bottom = 8.dp)
+                                )
+                            }
+
+                            items(state.upcomingOrNoDeadlineMainTasks) { task ->
+                                MainTaskItem(
+                                    task = task,
+                                    onClick = { onMainTaskClick(task.id) },
+                                    onToggleDone = { onToggleMainTaskDone(task.id) },
+                                    onAddSubTaskClick = { onAddSubTaskClick(task.id) }
+                                )
+                            }
                         }
                     }
                 }

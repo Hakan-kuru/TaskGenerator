@@ -8,6 +8,7 @@ data class Main_task_ui_model(
     val taskType: Task_type_ui,
 
     val hasSubTasks: Boolean,
+    val subTasks: List<Sub_task_ui_model>?,
     val doneSubTaskCount: Int,
     val totalSubTaskCount: Int,
 

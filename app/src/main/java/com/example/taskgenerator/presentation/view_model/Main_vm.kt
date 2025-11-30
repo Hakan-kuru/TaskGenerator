@@ -2,6 +2,7 @@ package com.example.taskgenerator.presentation.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskgenerator.domain.usecase.Get_main_task_with_sub_tasks_useCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,15 +11,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import com.example.taskgenerator.domain.usecase.Get_main_tasks_useCase
 import com.example.taskgenerator.domain.usecase.Toggle_main_task_done_usecase
 import com.example.taskgenerator.presentation.ui.screens.Main_screen_state
+import com.example.taskgenerator.utils.toUiModel
 
 // @HiltViewModel: Hilt'in bu ViewModel'e constructor ile bağımlılık enjekte etmesini sağlayan anotasyon.
 @HiltViewModel
 class Main_vm @Inject constructor(
     // Bu usecase'leri kendi projendeki isimlerle değiştir.
-    private val getMainTasksUseCase: Get_main_tasks_useCase,   // Tüm main task'ları getirir (Flow veya suspend)
+    private val getMainTasksGroupedByDeadlineUseCase: Get_main_task_with_sub_tasks_useCase,
     private val toggleMainTaskDoneUseCase: Toggle_main_task_done_usecase // isDone değiştirir
 ) : ViewModel() {
 
@@ -56,9 +57,8 @@ class Main_vm @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
-            // Burada senin GetMainTasksUseCase'inin dönüş tipine göre davranman lazım.
-            // Ben Flow<List<MainTask>> döndüğünü varsaydım.
-            getMainTasksUseCase()
+            // Burada artık deadline'a göre gruplayan usecase'i kullanıyoruz.
+            getMainTasksGroupedByDeadlineUseCase()
                 .catch { e ->
                     _state.update {
                         it.copy(
@@ -67,17 +67,17 @@ class Main_vm @Inject constructor(
                         )
                     }
                 }
-                .collectLatest { tasks ->
-                    _state.update {
-                        it.copy(
+                .collectLatest { groupedTasks ->
+                    _state.update { state ->
+                        state.copy(
                             isLoading = false,
-                            mainTasks = tasks.map { task -> task() }
+                            // İLK KEZ kullanıyoruz: domain Main_with_sub_tasks -> UI model dönüşümü için toUiModel() mapper
+                            overdueMainTasks = groupedTasks.overdue.map { it.toUiModel() },
+                            upcomingOrNoDeadlineMainTasks = groupedTasks.upcomingOrNoDeadline.map { it.toUiModel() }
                         )
                     }
                 }
         }
     }
-
     // Buradaki MainTask, domain katmanındaki modelin. Property isimlerini kendi modeline göre uyarla.
-
 }
