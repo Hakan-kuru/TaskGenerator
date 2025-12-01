@@ -5,7 +5,7 @@ object Routes {
 
     // Ekran isimleri (route stringleri)
     const val MAIN = "main"
-    const val ADD_MAIN_TASK = "add_main_task"
+    const val CREATE_MAIN_TASK = "add_main_task"
     const val ADD_SUB_TASK = "add_sub_task"
 
     // Argüman anahtarları

@@ -29,7 +29,7 @@ fun Main_task_entity.toDomain(): Main_task {
 // MainTask -> MainTaskEntity (Domain'den entity'e çevirim)
 fun Main_task.toEntity(): Main_task_entity {
     return Main_task_entity(
-        mainTaskId = id,
+        mainTaskId = id ?: 0L,
         title = title,
         description = description.toString(),
         taskType = taskType,

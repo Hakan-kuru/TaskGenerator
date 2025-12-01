@@ -3,16 +3,13 @@ package com.example.taskgenerator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.taskgenerator.presentation.ui.screens.Add_Sub_task_screen
-import com.example.taskgenerator.presentation.ui.screens.Add_main_task_form_screen
 import com.example.taskgenerator.presentation.ui.screens.MainScreen
 import com.example.taskgenerator.presentation.view_model.Main_vm
 import androidx.compose.runtime.collectAsState
+import com.example.taskgenerator.presentation.ui.screens.Create_main_task_screen
 
 // Bu ViewModel isimleri ve state/event alanları senin projende farklıysa
 // bu dosyayı kendi ViewModel imzalarına göre uyarlaman yeterli olacak.
@@ -69,8 +66,15 @@ fun Task_nav_rot(
                     )
                 },
                 onAddMainTaskClick = {
-                    navController.navigate(Routes.ADD_MAIN_TASK)
+                    navController.navigate(Routes.CREATE_MAIN_TASK)
                 }
+            )
+        }
+        composable(route = Routes.CREATE_MAIN_TASK) {
+            // Burada Hilt ViewModel'i Add_main_task_form_screen içinde alıyorsun
+            // (senin ekranın: vm ve UI’yi zaten orada bağladık)
+            Create_main_task_screen(
+                navController = navController
             )
         }
 

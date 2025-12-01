@@ -1,5 +1,6 @@
 package com.example.taskgenerator.utils
 
+import android.R.attr.description
 import com.example.taskgenerator.domain.model.Main_task
 import com.example.taskgenerator.domain.model.Sub_task
 import com.example.taskgenerator.domain.model.Main_with_sub_tasks
@@ -68,7 +69,7 @@ fun Main_with_sub_tasks.toUiModel(): Main_task_ui_model {
     val endDateText = main.updatedAt.toDateTextOrNull()
 
     return Main_task_ui_model(
-        id = main.id,
+        id = main.id ?:0L,
         title = main.title,
         description = main.description.orEmpty(),
         taskType = taskTypeUi,
