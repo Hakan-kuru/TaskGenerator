@@ -1,38 +1,42 @@
 package com.example.taskgenerator.presentation.ui.screens
 
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect // İLK KEZ kullanıyoruz: state değişince yan etki (navigasyon) çalıştırmak için.
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel // İLK KEZ kullanıyoruz: Hilt ile ViewModel alma helper'ı.
-import androidx.compose.runtime.collectAsState
-import androidx.navigation.NavController
-import com.example.taskgenerator.presentation.view_model.Create_main_task_vm
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import com.example.taskgenerator.presentation.ui_states.Create_main_task_state
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Create_main_task_screen(
-    navController: NavController,
-    viewModel: Create_main_task_vm = hiltViewModel()
+    state: Create_main_task_state,
+    onBackClick: () -> Unit,
+    onTitleChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onTaskTypeChange: (Task_type_ui) -> Unit,
+    onTargetCountChange: (String) -> Unit,
+    onDeadlineSelected: (Long) -> Unit,
+    onSaveClick: () -> Unit,
+    onSaved: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val state by viewModel.state.collectAsState()
+    // Kayıt başarılı olduğunda yukarıdan gelen onSaved tetikleniyor
+    LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            onSaved()
+        }
+    }
 
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -48,21 +52,12 @@ fun Create_main_task_screen(
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = state.deadlineDateMillis ?: todayStartMillis,
-        // Sadece bugünden sonraki günlerin seçilebilmesi için selectableDates
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 return utcTimeMillis >= todayStartMillis
             }
         }
     )
-
-    // Kayıt başarılı olduğunda geri dön
-    LaunchedEffect(state.isSaved) {
-        if (state.isSaved) {
-            // main ekrana geri dönüyoruz
-            navController.popBackStack()
-        }
-    }
 
     // DatePickerDialog
     if (showDatePicker) {
@@ -73,7 +68,7 @@ fun Create_main_task_screen(
                     onClick = {
                         val selected = datePickerState.selectedDateMillis
                         if (selected != null) {
-                            viewModel.onDeadlineSelected(selected)
+                            onDeadlineSelected(selected)
                         }
                         showDatePicker = false
                     }
@@ -98,7 +93,7 @@ fun Create_main_task_screen(
             TopAppBar(
                 title = { Text(text = "Yeni Görev Oluştur") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Geri"
@@ -114,19 +109,19 @@ fun Create_main_task_screen(
                 },
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack, // burada proper bir icon seç
+                        imageVector = Icons.Default.Check,
                         contentDescription = null
                     )
                 },
                 onClick = {
                     if (!state.isSaving) {
-                        viewModel.onSaveClicked()
+                        onSaveClick()
                     }
                 },
                 expanded = true
             )
-        }
-
+        },
+        modifier = modifier
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -138,7 +133,7 @@ fun Create_main_task_screen(
             // Başlık
             OutlinedTextField(
                 value = state.title,
-                onValueChange = { viewModel.onTitleChange(it) },
+                onValueChange = onTitleChange,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Başlık") },
                 isError = state.titleError != null,
@@ -146,7 +141,7 @@ fun Create_main_task_screen(
             )
             if (state.titleError != null) {
                 Text(
-                    text = state.titleError!!,
+                    text = state.titleError,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelSmall
                 )
@@ -157,7 +152,7 @@ fun Create_main_task_screen(
             // Açıklama
             OutlinedTextField(
                 value = state.description,
-                onValueChange = { viewModel.onDescriptionChange(it) },
+                onValueChange = onDescriptionChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 100.dp),
@@ -171,45 +166,41 @@ fun Create_main_task_screen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Görev tipi seçimleri (DONE / COUNT / TIME)
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Row {
-                        RadioButton(
-                            selected = state.taskType == "DONE",
-                            onClick = { viewModel.onTaskTypeChange("DONE") }
-                        )
-                        Text("Tamamlandı / Tamamlanmadı")
-                    }
+                    RadioButton(
+                        selected = state.taskType == Task_type_ui.Done,
+                        onClick = { onTaskTypeChange(Task_type_ui.Done) }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Tamamlandı / Tamamlanmadı")
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Row {
-                        RadioButton(
-                            selected = state.taskType == "COUNT",
-                            onClick = { viewModel.onTaskTypeChange("COUNT") }
-                        )
-                        Text("Sayıya bağlı görev (ör. 20 soru çöz)")
-                    }
+                    RadioButton(
+                        selected = state.taskType == Task_type_ui.Count,
+                        onClick = { onTaskTypeChange(Task_type_ui.Count) }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Sayıya bağlı görev (ör. 20 soru çöz)")
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Row {
-                        RadioButton(
-                            selected = state.taskType == "TIME",
-                            onClick = { viewModel.onTaskTypeChange("TIME") }
-                        )
-                        Text("Zamana bağlı görev (dakika)")
-                    }
+                    RadioButton(
+                        selected = state.taskType == Task_type_ui.Time,
+                        onClick = { onTaskTypeChange(Task_type_ui.Time) }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Zamana bağlı görev (dakika)")
                 }
             }
 
@@ -237,19 +228,9 @@ fun Create_main_task_screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Hata mesajı
-            state.errorMessage?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
             // COUNT / TIME tipi için hedef alanı
-            if (state.taskType == "COUNT" || state.taskType == "TIME") {
-                val label = if (state.taskType == "COUNT") {
+            if (state.taskType == Task_type_ui.Count || state.taskType == Task_type_ui.Time) {
+                val label = if (state.taskType == Task_type_ui.Count) {
                     "Hedef sayı"
                 } else {
                     "Hedef süre (dakika)"
@@ -257,7 +238,7 @@ fun Create_main_task_screen(
 
                 OutlinedTextField(
                     value = state.targetCountText,
-                    onValueChange = { viewModel.onTargetCountChange(it) },
+                    onValueChange = onTargetCountChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(label) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -274,10 +255,7 @@ fun Create_main_task_screen(
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
-
-            // İleride tarih seçici, alt görev ekleme vs. buraya gelebilir.
         }
     }
 }

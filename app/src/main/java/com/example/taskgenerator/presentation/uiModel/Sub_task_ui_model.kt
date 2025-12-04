@@ -1,4 +1,4 @@
-package com.example.taskgenerator.presentation.ui_states
+package com.example.taskgenerator.presentation.uiModel
 
 data class Sub_task_ui_model(
     val id: Long,
@@ -10,5 +10,8 @@ data class Sub_task_ui_model(
     val currentCount: Int?,
     val targetCount: Int?,
     val currentMinutes: Int?,
-    val targetMinutes: Int?
+    val targetMinutes: Int?,
+    // UI'da gösterilecek tarih string'leri
+    val startDateText: String?,
+    val endDateText: String?
 )

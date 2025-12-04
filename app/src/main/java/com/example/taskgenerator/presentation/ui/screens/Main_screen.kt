@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,21 +33,16 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.taskgenerator.presentation.ui_states.Main_task_ui_model
-import kotlin.collections.isNotEmpty
-
-// UI için kullanacağımız task type modeli.
-// DB'de string tuttun; ViewModel bu stringleri bu tipe map edebilir.
-sealed class Task_type_ui(val rawValue: String) {
-    data object Done : Task_type_ui("Done")
-    data object Count : Task_type_ui("Count")
-    data object Time : Task_type_ui("Time")
-}
+import com.example.taskgenerator.presentation.uiModel.Main_task_ui_model
+import com.example.taskgenerator.presentation.uiModel.Sub_task_ui_model
+import com.example.taskgenerator.presentation.uiModel.Task_type_ui
 
 // Ana ekranın ihtiyaç duyduğu state
 data class Main_screen_state(
@@ -72,6 +68,8 @@ fun MainScreen(
     onAddMainTaskClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val expandedTaskIdsState = rememberSaveable { mutableStateOf(setOf<Long>()) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -162,8 +160,20 @@ fun MainScreen(
                             }
 
                             items(state.overdueMainTasks) { task ->
+                                val isExpanded =
+                                    expandedTaskIdsState.value.contains(task.id)
+
                                 MainTaskItem(
                                     task = task,
+                                    isExpanded = isExpanded,
+                                    onCardClick = {
+                                        val current = expandedTaskIdsState.value
+                                        expandedTaskIdsState.value =
+                                            if (isExpanded) current - task.id else current + task.id
+
+                                        // İstersen burada detay ekrana gitmek için de çağırabilirsin:
+                                        // onMainTaskClick(task.id)
+                                    },
                                     onClick = { onMainTaskClick(task.id) },
                                     onToggleDone = { onToggleMainTaskDone(task.id) },
                                     onAddSubTaskClick = { onAddSubTaskClick(task.id) }
@@ -185,8 +195,17 @@ fun MainScreen(
                             }
 
                             items(state.upcomingOrNoDeadlineMainTasks) { task ->
+                                val isExpanded =
+                                    expandedTaskIdsState.value.contains(task.id)
+
                                 MainTaskItem(
                                     task = task,
+                                    isExpanded = isExpanded,
+                                    onCardClick = {
+                                        val current = expandedTaskIdsState.value
+                                        expandedTaskIdsState.value =
+                                            if (isExpanded) current - task.id else current + task.id
+                                    },
                                     onClick = { onMainTaskClick(task.id) },
                                     onToggleDone = { onToggleMainTaskDone(task.id) },
                                     onAddSubTaskClick = { onAddSubTaskClick(task.id) }
@@ -211,18 +230,20 @@ fun MainScreen(
 @Composable
 private fun MainTaskItem(
     task: Main_task_ui_model,
+    isExpanded: Boolean,
+    onCardClick: () -> Unit,
     onClick: () -> Unit,
     onToggleDone: (Boolean) -> Unit,
     onAddSubTaskClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        onClick = onClick,
+        onClick = onCardClick,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(horizontal =  12.dp, vertical = 8.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -254,17 +275,19 @@ private fun MainTaskItem(
                 }
             }
 
+            if (!isExpanded) return@Card
+
             if (task.description.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = task.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -335,6 +358,19 @@ private fun MainTaskItem(
                 }
             }
 
+            val subTasks = task.subTasks.orEmpty()
+            if (subTasks.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    subTasks.forEach { subTask ->
+                        SubTaskRow(subTask = subTask)
+                    }
+                }
+            }
+
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -349,6 +385,42 @@ private fun MainTaskItem(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Alt görev ekle")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SubTaskRow(
+    subTask: Sub_task_ui_model,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = if (subTask.isDone) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = subTask.title,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (subTask.description.isNotBlank()) {
+                Text(
+                    text = subTask.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

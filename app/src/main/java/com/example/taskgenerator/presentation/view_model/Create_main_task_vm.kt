@@ -1,10 +1,10 @@
 package com.example.taskgenerator.presentation.view_model
 
-import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taskgenerator.domain.model.Main_task
 import com.example.taskgenerator.domain.usecase.Create_main_task_useCase
+import com.example.taskgenerator.presentation.uiModel.Task_type_ui
 import com.example.taskgenerator.presentation.ui_states.Create_main_task_state
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -41,11 +41,11 @@ class Create_main_task_vm @Inject constructor(
         }
     }
 
-    fun onTaskTypeChange(newType: String) {
+    fun onTaskTypeChange(newType: Task_type_ui) {
         _state.update { current ->
             current.copy(
                 taskType = newType,
-                // tip değişince hedef alanını sıfırlayalım
+                // tip incidence hedef alanını sıfırlayalım
                 targetCountText = ""
             )
         }
@@ -75,7 +75,7 @@ class Create_main_task_vm @Inject constructor(
 
         // COUNT / TIME tipi için hedef sayı validasyonu
         val targetCount: Int? = when (current.taskType) {
-            "COUNT", "TIME" -> {
+            Task_type_ui.Count, Task_type_ui.Time -> {
                 if (current.targetCountText.isBlank()) {
                     _state.update {
                         it.copy(
@@ -110,7 +110,7 @@ class Create_main_task_vm @Inject constructor(
                     id = null,
                     title = current.title.trim(),
                     description = current.description.trim().ifBlank { null },
-                    taskType = current.taskType, // "DONE", "COUNT", "TIME" gibi
+                    taskType = current.taskType.toString(), // "DONE", "COUNT", "TIME" gibi
                     isDone = false,
                     targetCount = targetCount,
                     currentCount = if (targetCount != null) 0 else null,

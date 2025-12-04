@@ -1,12 +1,13 @@
 package com.example.taskgenerator.utils
 
-import android.R.attr.description
+import android.R.attr.end
+import androidx.room.coroutines.createFlow
 import com.example.taskgenerator.domain.model.Main_task
 import com.example.taskgenerator.domain.model.Sub_task
 import com.example.taskgenerator.domain.model.Main_with_sub_tasks
-import com.example.taskgenerator.presentation.ui_states.Main_task_ui_model
-import com.example.taskgenerator.presentation.ui_states.Sub_task_ui_model
-import com.example.taskgenerator.presentation.ui_states.Task_type_ui
+import com.example.taskgenerator.presentation.uiModel.Main_task_ui_model
+import com.example.taskgenerator.presentation.uiModel.Sub_task_ui_model
+import com.example.taskgenerator.presentation.uiModel.Task_type_ui
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -38,6 +39,13 @@ private val dateFormatter by lazy {
     SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 }
 
+fun dateStringToLong(dateString: String): Long? {
+    return try {
+        dateFormatter.parse(dateString)?.time   // <-- milisaniye olarak Long
+    } catch (e: Exception) {
+        null
+    }
+}
 // Long? -> "dd.MM.yyyy" veya null
 fun Long?.toDateTextOrNull(): String? {
     return this?.let { millis ->
@@ -101,11 +109,30 @@ fun Sub_task.toUiModel(): Sub_task_ui_model{
         mainTaskId = mainTaskId,
         title = title,
         description = description.orEmpty(),
-        taskType =taskTypeUi,
+        taskType = taskTypeUi,
         isDone = isDone,
         currentCount = currentCount,
         targetCount = targetCount,
         currentMinutes = if (taskTypeUi is Task_type_ui.Time) currentCount else null,
         targetMinutes = if (taskTypeUi is Task_type_ui.Time) targetCount else null,
-        )
+        startDateText = createdAt.toDateTextOrNull(),
+        endDateText = updatedAt.toDateTextOrNull(),
+    )
 }
+fun Sub_task_ui_model.toDomain(): Sub_task{
+    val start =dateStringToLong(startDateText!!)
+    val update =dateStringToLong(endDateText!!)
+    return Sub_task(
+        id = 0L,
+        mainTaskId = mainTaskId,
+        title = title,
+        description = description,
+        taskType = taskType.toDomainString(),
+        targetCount = targetCount,
+        currentCount = currentCount,
+        isDone = isDone,
+        createdAt = start!!,
+        updatedAt = update!!
+    )
+}
+
