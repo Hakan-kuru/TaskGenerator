@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import com.example.taskgenerator.presentation.ui.screens.Create_main_task_screen
 import com.example.taskgenerator.presentation.view_model.Create_main_task_vm
 import com.example.taskgenerator.presentation.ui.screens.Add_sub_task_screen
+import com.example.taskgenerator.presentation.view_model.Add_sub_task_vm
 
 // Bu ViewModel isimleri ve state/event alanları senin projende farklıysa
 // bu dosyayı kendi ViewModel imzalarına göre uyarlaman yeterli olacak.
@@ -43,6 +44,18 @@ fun Task_nav_rot(
                 onRefresh = { viewModel.refresh() },
                 onMainTaskClick = { mainTaskId ->
                     // İleride detay ekranı eklersen buradan yönlendirebilirsin
+                },
+                onSubTaskToggleDone = { subTaskId, newValue ->
+                    viewModel.onSubTaskToggleDone(
+                        subTaskId = subTaskId,
+                        newValue = newValue
+                    )
+                },
+                onSubTaskCountChange = { subTaskId, newCount ->
+                    viewModel.onSubTaskCountChange(
+                        subTaskId = subTaskId,
+                        newCount = newCount
+                    )
                 },
                 onToggleMainTaskDone = { taskId ->
                     viewModel.toggleMainTaskDone(taskId)

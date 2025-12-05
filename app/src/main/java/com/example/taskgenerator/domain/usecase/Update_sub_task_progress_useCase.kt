@@ -8,7 +8,7 @@ class Update_sub_task_progress_useCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         subTaskId: Long,
-        isDone: Boolean? = null,
+        isDone: Boolean? = false,
         currentCount: Int? = null
     ) {
         repository.updateSubTaskProgress(

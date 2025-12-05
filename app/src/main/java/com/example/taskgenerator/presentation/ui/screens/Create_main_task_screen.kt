@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.taskgenerator.presentation.uiModel.Task_type_ui
 import com.example.taskgenerator.presentation.ui_states.Create_main_task_state
 import java.text.SimpleDateFormat
 import java.util.Calendar

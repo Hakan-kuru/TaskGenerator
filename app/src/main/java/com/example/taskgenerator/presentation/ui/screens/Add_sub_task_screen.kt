@@ -208,10 +208,6 @@ fun Add_sub_task_screen(
                 is Task_type_ui.Done -> {
                     // Done tipi için ekstra alan yok
                 }
-
-                com.example.taskgenerator.presentation.uiModel.Task_type_ui.Count -> TODO()
-                com.example.taskgenerator.presentation.uiModel.Task_type_ui.Done -> TODO()
-                com.example.taskgenerator.presentation.uiModel.Task_type_ui.Time -> TODO()
             }
 
             if (state.targetError != null) {
