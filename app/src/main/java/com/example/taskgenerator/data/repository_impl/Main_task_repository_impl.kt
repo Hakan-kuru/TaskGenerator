@@ -15,6 +15,11 @@ class Main_task_repository_impl @Inject constructor(
     private val mainTaskDao: Main_task_dao
 ) : Main_repository {
 
+    override suspend fun deleteMainTaskWithSubTasks(mainTaskId: Long) {
+        // Not: Eğer Room'da foreign key + CASCADE kullandıysan,
+        mainTaskDao.deleteMainTask(mainTaskId)
+    }
+
     override suspend fun toggleMainTaskDone(mainTaskId: Long) {
         mainTaskDao.toggleMainTaskDone(mainTaskId)
     }

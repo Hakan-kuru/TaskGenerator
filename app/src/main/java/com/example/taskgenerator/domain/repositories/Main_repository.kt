@@ -26,5 +26,11 @@ interface Main_repository {
     suspend fun toggleMainTaskDone(mainTaskId: Long)
 
 
+    /**
+     * Verilen main task id'sine sahip ana görevi siler.
+     * Bu işlem sırasında o göreve bağlı TÜM sub task'lar da silinir.
+     */
+    suspend fun deleteMainTaskWithSubTasks(mainTaskId: Long)
+
     fun getAllMainTasksWithSubTasks(): Flow<List<Main_with_sub_tasks>>
 }

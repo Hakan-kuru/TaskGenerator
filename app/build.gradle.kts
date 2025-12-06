@@ -53,6 +53,7 @@ dependencies {
     // region Hilt (ilk defa ekleniyor)
     val hiltVersion = "2.57.1"
 
+    implementation("androidx.compose.material:material")
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     // endregion

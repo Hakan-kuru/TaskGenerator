@@ -35,7 +35,9 @@ fun Task_nav_rot(
         modifier = modifier
     ) {
         // 🔹 ANA EKRAN
-        composable(route = Routes.MAIN) {
+        composable(
+            route = Routes.MAIN
+        ) {
             val viewModel: Main_vm = hiltViewModel()
             val uiState = viewModel.state.collectAsState()
 
@@ -69,12 +71,18 @@ fun Task_nav_rot(
                         )
                     )
                 },
+                onMainTaskDelete = { id -> viewModel.onMainTaskDelete(id) },
                 onAddMainTaskClick = {
                     navController.navigate(Routes.CREATE_MAIN_TASK)
-                }
+                },
+                onSubTaskDelete = { id -> viewModel.onSubTaskDelete(id) },
+                onSubTaskClick = { id -> navController.navigate("editSubTask/$id") }
+
             )
         }
-        composable(route = Routes.CREATE_MAIN_TASK) {
+        composable(
+            route = Routes.CREATE_MAIN_TASK
+        ) {
             var viewModel: Create_main_task_vm =hiltViewModel()      
             val uiState by viewModel.state.collectAsState()
             // Burada Hilt ViewModel'i Add_main_task_form_screen içinde alıyorsun

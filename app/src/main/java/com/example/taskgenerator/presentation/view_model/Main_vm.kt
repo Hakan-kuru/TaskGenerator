@@ -3,6 +3,8 @@ package com.example.taskgenerator.presentation.view_model
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.taskgenerator.domain.usecase.Delete_main_task_useCase
+import com.example.taskgenerator.domain.usecase.Delete_sub_task_useCase
 import com.example.taskgenerator.domain.usecase.Get_main_task_with_sub_tasks_useCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -20,7 +22,8 @@ import com.example.taskgenerator.utils.toUiModel
 // @HiltViewModel: Hilt'in bu ViewModel'e constructor ile bağımlılık enjekte etmesini sağlayan anotasyon.
 @HiltViewModel
 class Main_vm @Inject constructor(
-    // Bu usecase'leri kendi projendeki isimlerle değiştir.
+    private val deleteMainTaskUseCase: Delete_main_task_useCase,
+    private val deleteSubTaskUseCase: Delete_sub_task_useCase,
     private val getMainTasksGroupedByDeadlineUseCase: Get_main_task_with_sub_tasks_useCase,
     private val toggleMainTaskDoneUseCase: Toggle_main_task_done_usecase, // isDone değiştirir
     private val update_sub_task_progress_useCase:  Update_sub_task_progress_useCase
@@ -36,6 +39,20 @@ class Main_vm @Inject constructor(
 
     fun refresh() {
         loadTasks()
+    }
+
+    fun onMainTaskDelete(mainTaskId: Long) {
+        viewModelScope.launch {
+            deleteMainTaskUseCase(mainTaskId)
+            refresh()
+        }
+    }
+
+    fun onSubTaskDelete(subTaskId: Long) {
+        viewModelScope.launch {
+            deleteSubTaskUseCase(subTaskId)
+            refresh()
+        }
     }
 
     fun toggleMainTaskDone(mainId: Long) {
@@ -119,5 +136,4 @@ class Main_vm @Inject constructor(
                 }
         }
     }
-    // Buradaki MainTask, domain katmanındaki modelin. Property isimlerini kendi modeline göre uyarla.
 }

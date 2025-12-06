@@ -50,6 +50,14 @@ import com.example.taskgenerator.presentation.ui.theme.AppTheme
 import com.example.taskgenerator.presentation.uiModel.Main_task_ui_model
 import com.example.taskgenerator.presentation.uiModel.Sub_task_ui_model
 import com.example.taskgenerator.presentation.uiModel.Task_type_ui
+// kullanıyoruz: swipe ile silme/düzenleme için Material (M2) bileşenleri.
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.rememberDismissState
+
+import androidx.compose.material3.AlertDialog
 
 // Ana ekranın ihtiyaç duyduğu state
 data class Main_screen_state(
@@ -59,7 +67,7 @@ data class Main_screen_state(
     val overdueMainTasks: List<Main_task_ui_model> = emptyList()
 )
 
-// İLK KEZ kullanıyoruz: Üstteki iki buton için filtre tab enum'u.
+// kullanıyoruz: Üstteki iki buton için filtre tab enum'u.
 private enum class TaskFilterTab {
     ACTIVE, // Şu anki tarihi geçmemiş görevler
     OVERDUE // Geçmiş görevler
@@ -82,6 +90,10 @@ fun MainScreen(
     onAddMainTaskClick: () -> Unit,
     onSubTaskToggleDone: (subTaskId: Long, newValue: Boolean) -> Unit = { _, _ -> },
     onSubTaskCountChange: (subTaskId: Long, newCount: Int) -> Unit = { _, _ -> },
+    //  swipe ile silme/düzenleme için callback'ler
+    onMainTaskDelete: (Long) -> Unit = {},   // main task sil (arkada tüm sub task'ları da silersin)
+    onSubTaskDelete: (Long) -> Unit = {},    // sub task sil
+    onSubTaskClick: (Long) -> Unit = {},     // sub task düzenleme ekranına git
     modifier: Modifier = Modifier
 ) {
 
@@ -92,6 +104,9 @@ fun MainScreen(
 
     // Seçili main task'ın alt görevlerini altta ayrı bir panelde göstermek için state
     val selectedMainTaskIdState = rememberSaveable { mutableStateOf<Long?>(null) }
+
+    val mainTaskToDeleteIdState = rememberSaveable { mutableStateOf<Long?>(null) }
+    val subTaskToDeleteIdState = rememberSaveable { mutableStateOf<Long?>(null) }
 
     Scaffold(
         topBar = {
@@ -235,15 +250,21 @@ fun MainScreen(
                                 items(currentList) { task ->
                                     val isExpanded = expandedTaskIdState.value == task.id
 
-                                    MainTaskItem(
+                                    SwipeableMainTaskItem(
                                         task = task,
                                         isExpanded = isExpanded,
                                         onCardClick = {
-                                            // Kart tıklanınca hem seçili task'ı ayarlıyoruz
-                                            selectedMainTaskIdState.value = task.id
-                                            expandedTaskIdState.value =
-                                                if (expandedTaskIdState.value == task.id) null else task.id
+                                            val isCurrentlyExpanded = expandedTaskIdState.value == task.id
 
+                                            if (isCurrentlyExpanded) {
+                                                // Kart zaten açıksa: kapat + alttaki paneli temizle
+                                                expandedTaskIdState.value = null
+                                                selectedMainTaskIdState.value = null
+                                            } else {
+                                                // Yeni kartı aç: hem expand, hem alt panelde bunu seç
+                                                expandedTaskIdState.value = task.id
+                                                selectedMainTaskIdState.value = task.id
+                                            }
                                         },
                                         onToggleDone = { onToggleMainTaskDone(task.id) },
                                         onAddSubTaskClick = { onAddSubTaskClick(task.id) },
@@ -252,9 +273,12 @@ fun MainScreen(
                                         },
                                         onSubTaskCountChange = { subTaskId, newCount ->
                                             onSubTaskCountChange(subTaskId, newCount)
-                                        }
+                                        },
+                                        onEdit = { id -> onMainTaskClick(id) },                  // SAĞA kaydırınca düzenle
+                                        onDeleteRequest = { id -> mainTaskToDeleteIdState.value = id } // SOLA kaydırınca dialog aç
                                     )
                                 }
+
                             }
 
                             Divider(modifier = Modifier
@@ -268,17 +292,85 @@ fun MainScreen(
                                     selectedMainTask?.let { onAddSubTaskClick(it.id) }
                                 },
                                 onSubTaskToggleDone = onSubTaskToggleDone,
-                                onSubTaskCountChange = onSubTaskCountChange
+                                onSubTaskCountChange = onSubTaskCountChange,
+                                onSubTaskClick = onSubTaskClick,
+                                onSubTaskDeleteRequest = { id -> subTaskToDeleteIdState.value = id }
                             )
+
                         }
                     }
                 }
             }
         }
     }
+
+    // Main task silme dialogu
+    if (mainTaskToDeleteIdState.value != null) {
+        AlertDialog(
+            onDismissRequest = { mainTaskToDeleteIdState.value = null },
+            title = {
+                Text(text = "Görevi sil")
+            },
+            text = {
+                Text(
+                    text = "Bu ana görevi ve bağlı tüm alt görevleri silmek istediğine emin misin?"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mainTaskToDeleteIdState.value?.let { onMainTaskDelete(it) }
+                        mainTaskToDeleteIdState.value = null
+                    }
+                ) {
+                    Text(text = "Sil", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mainTaskToDeleteIdState.value = null }
+                ) {
+                    Text(text = "Vazgeç")
+                }
+            }
+        )
+    }
+
+    // Sub task silme dialogu
+    if (subTaskToDeleteIdState.value != null) {
+        AlertDialog(
+            onDismissRequest = { subTaskToDeleteIdState.value = null },
+            title = {
+                Text(text = "Alt görevi sil")
+            },
+            text = {
+                Text(
+                    text = "Bu alt görevi silmek istediğine emin misin?"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        subTaskToDeleteIdState.value?.let { onSubTaskDelete(it) }
+                        subTaskToDeleteIdState.value = null
+                    }
+                ) {
+                    Text(text = "Sil", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { subTaskToDeleteIdState.value = null }
+                ) {
+                    Text(text = "Vazgeç")
+                }
+            }
+        )
+    }
+
 }
 
-// İLK KEZ kullanıyoruz: Üstteki "Geçmiş görevler / Aktif görevler" geçiş barı.
+// Üstteki "Geçmiş görevler / Aktif görevler" geçiş barı.
 @Composable
 private fun TaskFilterBar(
     selectedTab: TaskFilterTab,
@@ -513,40 +605,24 @@ private fun MainTaskItem(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    TextButton(
-                        onClick = onAddSubTaskClick,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Alt görev ekle",
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                } else {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        subTasks.forEach { subTask ->
-                            SubTaskCard(
-                                subTask = subTask,
-                                onToggleDone = { newValue ->
-                                    onSubTaskToggleDone(subTask.id, newValue)
-                                },
-                                onCountChange = { newCount ->
-                                    onSubTaskCountChange(subTask.id, newCount)
-                                }
-                            )
-                        }
-                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                TextButton(
+                    onClick = onAddSubTaskClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Alt görev ekle",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }
@@ -554,7 +630,7 @@ private fun MainTaskItem(
 }
 
 /**
- * İLK KEZ kullanıyoruz: Ekranın altındaki ayrı panel.
+ *  Ekranın altındaki ayrı panel.
  *
  * main task kartına tıklanınca, burada:
  * - Eğer alt görevleri varsa: her sub task için ayrı kart
@@ -566,6 +642,8 @@ private fun SelectedMainTaskDetailPanel(
     onAddSubTaskClick: () -> Unit,
     onSubTaskToggleDone: (Long, Boolean) -> Unit,
     onSubTaskCountChange: (Long, Int) -> Unit,
+    onSubTaskClick: (Long) -> Unit,              //  sub task düzenleme
+    onSubTaskDeleteRequest: (Long) -> Unit,      //  sub task silme isteği
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -624,18 +702,20 @@ private fun SelectedMainTaskDetailPanel(
             ) {
                 subTasks.forEach { subTask ->
 
-                    SubTaskCard(
+                    SwipeableSubTaskCard(
                         subTask = subTask,
                         onToggleDone = { newValue ->
                             onSubTaskToggleDone(subTask.id, newValue)
                         },
                         onCountChange = { newCount ->
-
-                            onSubTaskToggleDone(subTask.id,
-                                newCount>= subTask.targetCount!!.toInt()
+                            onSubTaskToggleDone(
+                                subTask.id,
+                                newCount >= (subTask.targetCount ?: 0).toInt()
                             )
                             onSubTaskCountChange(subTask.id, newCount)
-                        }
+                        },
+                        onEdit = { id -> onSubTaskClick(id) },                     // SAĞA kaydır: düzenleme
+                        onDeleteRequest = { id -> onSubTaskDeleteRequest(id) }     // SOLA kaydır: silme dialogu
                     )
                 }
             }
@@ -644,7 +724,7 @@ private fun SelectedMainTaskDetailPanel(
 }
 
 /**
- * İLK KEZ kullanıyoruz: Alt panelde görüntülenen sub task kartı.
+ *  Alt panelde görüntülenen sub task kartı.
  *
  * - Task_type_ui.One  -> on/off butonu ile isDone değişir.
  * - Task_type_ui.Count -> bar + sol/sağında - / + butonları.
@@ -792,6 +872,146 @@ private fun SubTaskCard(
 }
 
 
+// Main task kartını sağa/sola kaydırarak düzenleme / silme.
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SwipeableMainTaskItem(
+    task: Main_task_ui_model,
+    isExpanded: Boolean,
+    onSubTaskToggleDone: (Long, Boolean) -> Unit,
+    onSubTaskCountChange: (Long, Int) -> Unit,
+    onCardClick: () -> Unit,
+    onToggleDone: () -> Unit,
+    onAddSubTaskClick: () -> Unit,
+    onEdit: (Long) -> Unit,
+    onDeleteRequest: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dismissState = rememberDismissState(
+        confirmStateChange = { newValue ->
+            when (newValue) {
+                DismissValue.DismissedToEnd -> { // Start -> End (sağa kaydır)
+                    onEdit(task.id)
+                    false // kartı kapatma, eski yerine dönsün
+                }
+                DismissValue.DismissedToStart -> { // End -> Start (sola kaydır)
+                    onDeleteRequest(task.id)
+                    false
+                }
+                else -> true
+            }
+        }
+    )
+
+    SwipeToDismiss(
+        state = dismissState,
+        modifier = modifier,
+        directions = setOf(
+            DismissDirection.StartToEnd,
+            DismissDirection.EndToStart
+        ),
+        background = {
+            // Çok abartmadan, minimal bir arka plan gösterebiliriz.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Sol taraf (sağa kaydır = düzenle)
+                Text(
+                    text = "Düzenle",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                // Sağ taraf (sola kaydır = sil)
+                Text(
+                    text = "Sil",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissContent = {
+            MainTaskItem(
+                task = task,
+                isExpanded = isExpanded,
+                onSubTaskToggleDone = onSubTaskToggleDone,
+                onSubTaskCountChange = onSubTaskCountChange,
+                onCardClick = onCardClick,
+                onToggleDone = onToggleDone,
+                onAddSubTaskClick = onAddSubTaskClick
+            )
+        }
+    )
+}
+
+//  Sub task kartını sağa/sola kaydırarak düzenleme / silme.
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun SwipeableSubTaskCard(
+    subTask: Sub_task_ui_model,
+    onToggleDone: (Boolean) -> Unit,
+    onCountChange: (Int) -> Unit,
+    onEdit: (Long) -> Unit,
+    onDeleteRequest: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dismissState = rememberDismissState(
+        confirmStateChange = { newValue ->
+            when (newValue) {
+                DismissValue.DismissedToEnd -> { // sağa kaydır: düzenle
+                    onEdit(subTask.id)
+                    false
+                }
+                DismissValue.DismissedToStart -> { // sola kaydır: sil
+                    onDeleteRequest(subTask.id)
+                    false
+                }
+                else -> true
+            }
+        }
+    )
+
+    SwipeToDismiss(
+        state = dismissState,
+        modifier = modifier,
+        directions = setOf(
+            DismissDirection.StartToEnd,
+            DismissDirection.EndToStart
+        ),
+        background = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Düzenle",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Sil",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissContent = {
+            SubTaskCard(
+                subTask = subTask,
+                onToggleDone = onToggleDone,
+                onCountChange = onCountChange
+            )
+        }
+    )
+}
+
+
 /**
  * MainScreen için light tema önizlemesi.
  */
@@ -875,7 +1095,7 @@ fun MainScreenSampleDarkPreview() {
     }
 }
 
-// İLK KEZ: Preview’de kullanılacak sahte state
+// Preview’de kullanılacak sahte state
 private fun sampleMainScreenState(): Main_screen_state {
     // BURASI ÖNEMLİ:
     // Main_task_ui_model ve Sub_task_ui_model'in constructor'ını

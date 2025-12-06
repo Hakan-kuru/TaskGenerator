@@ -46,4 +46,7 @@ interface Main_task_dao {
         WHERE mainTaskId = :mainTaskId
     """)
     suspend fun toggleMainTaskDone(mainTaskId: Long)
+
+    @Query("DELETE FROM main_task WHERE mainTaskId = :mainTaskId")
+    suspend fun deleteMainTask(mainTaskId: Long)
 }
