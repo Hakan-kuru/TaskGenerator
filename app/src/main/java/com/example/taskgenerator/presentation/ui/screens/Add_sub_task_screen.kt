@@ -44,28 +44,39 @@ fun Add_sub_task_screen(
                     Text(
                         text = state.parentTaskTitle
                             ?.let { "Alt Görev - $it" }
-                            ?: "Yeni Alt Görev"
+                            ?: "Yeni Alt Görev",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Geri"
+                            contentDescription = "Geri",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 text = {
-                    Text(if (state.isSaving) "Kaydediliyor..." else "Kaydet")
+                    Text(
+                        text = if (state.isSaving) "Kaydediliyor..." else "Kaydet",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 onClick = {
@@ -73,7 +84,8 @@ fun Add_sub_task_screen(
                         onSaveClick()
                     }
                 },
-                expanded = true
+                expanded = true,
+                containerColor = MaterialTheme.colorScheme.primary
             )
         },
         modifier = modifier
@@ -88,12 +100,14 @@ fun Add_sub_task_screen(
             // Ana görev bilgisi (sadece bilgi amaçlı)
             Text(
                 text = "Ana Görev ID: ${state.parentTaskId}",
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             state.parentTaskTitle?.let { title ->
                 Text(
                     text = "Ana Görev: $title",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -131,7 +145,11 @@ fun Add_sub_task_screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = "Alt Görev Tipi", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Alt Görev Tipi", 
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -145,7 +163,10 @@ fun Add_sub_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Done) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Tamamlandı / Tamamlanmadı")
+                    Text(
+                        text = "Tamamlandı / Tamamlanmadı",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 Row(
@@ -157,7 +178,10 @@ fun Add_sub_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Count) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Sayıya bağlı alt görev (ör. 10 soru çöz)")
+                    Text(
+                        text = "Sayıya bağlı alt görev (ör. 10 soru çöz)",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 Row(
@@ -169,7 +193,10 @@ fun Add_sub_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Time) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Zamana bağlı alt görev (dakika)")
+                    Text(
+                        text = "Zamana bağlı alt görev (dakika)",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
 

@@ -11,7 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.taskgenerator.presentation.ui.theme.TaskGeneratorTheme
+import com.example.taskgenerator.presentation.ui.theme.AppPalette
+import com.example.taskgenerator.presentation.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +21,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TaskGeneratorTheme {
+            AppTheme (
+                darkTheme = true,
+                palette = AppPalette.SUNSET
+            ){
                 Task_nav_rot(
                 modifier = Modifier.fillMaxSize()
             )

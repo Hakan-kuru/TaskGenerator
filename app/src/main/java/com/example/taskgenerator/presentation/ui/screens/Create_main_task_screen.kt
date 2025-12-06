@@ -72,14 +72,28 @@ fun Create_main_task_screen(
                             onDeadlineSelected(selected)
                         }
                         showDatePicker = false
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
-                    Text("Tamam")
+                    Text(
+                        text = "Tamam",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("İptal")
+                TextButton(
+                    onClick = { showDatePicker = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = "İptal",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         ) {
@@ -92,26 +106,41 @@ fun Create_main_task_screen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Yeni Görev Oluştur") },
+                title = { 
+                    Text(
+                        text = "Yeni Görev Oluştur",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Geri"
+                            contentDescription = "Geri",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 text = {
-                    Text(if (state.isSaving) "Kaydediliyor..." else "Kaydet")
+                    Text(
+                        text = if (state.isSaving) "Kaydediliyor..." else "Kaydet",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 onClick = {
@@ -119,7 +148,8 @@ fun Create_main_task_screen(
                         onSaveClick()
                     }
                 },
-                expanded = true
+                expanded = true,
+                containerColor = MaterialTheme.colorScheme.primary
             )
         },
         modifier = modifier
@@ -163,7 +193,11 @@ fun Create_main_task_screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(text = "Görev Tipi", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Görev Tipi", 
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -177,7 +211,10 @@ fun Create_main_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Done) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Tamamlandı / Tamamlanmadı")
+                    Text(
+                        text = "Tamamlandı / Tamamlanmadı",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 Row(
@@ -189,7 +226,10 @@ fun Create_main_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Count) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Sayıya bağlı görev (ör. 20 soru çöz)")
+                    Text(
+                        text = "Sayıya bağlı görev (ör. 20 soru çöz)",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 Row(
@@ -201,12 +241,19 @@ fun Create_main_task_screen(
                         onClick = { onTaskTypeChange(Task_type_ui.Time) }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Zamana bağlı görev (dakika)")
+                    Text(
+                        text = "Zamana bağlı görev (dakika)",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Hedef Bitiş Tarihi", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Hedef Bitiş Tarihi", 
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -219,11 +266,20 @@ fun Create_main_task_screen(
 
                 Text(
                     text = deadlineText,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
-                TextButton(onClick = { showDatePicker = true }) {
-                    Text("Tarih Seç")
+                TextButton(
+                    onClick = { showDatePicker = true },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(
+                        text = "Tarih Seç",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 

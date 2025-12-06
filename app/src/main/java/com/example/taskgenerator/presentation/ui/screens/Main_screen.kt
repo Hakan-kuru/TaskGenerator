@@ -1,5 +1,6 @@
 package com.example.taskgenerator.presentation.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,12 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider // İLK KEZ kullanıyoruz: görev listesi ile alt paneli ayırmak için çizgi.
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,7 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.taskgenerator.presentation.ui.theme.AppTheme
 import com.example.taskgenerator.presentation.uiModel.Main_task_ui_model
 import com.example.taskgenerator.presentation.uiModel.Sub_task_ui_model
 import com.example.taskgenerator.presentation.uiModel.Task_type_ui
@@ -91,14 +96,27 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Task Generator") }
+                title = { 
+                    Text(
+                        text = "Task Generator",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddMainTaskClick) {
+            FloatingActionButton(
+                onClick = onAddMainTaskClick,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Yeni görev ekle"
+                    contentDescription = "Yeni görev ekle",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
@@ -116,7 +134,8 @@ fun MainScreen(
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -133,8 +152,16 @@ fun MainScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = onRefresh) {
-                            Text("Tekrar dene")
+                        Button(
+                            onClick = onRefresh,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                text = "Tekrar dene",
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 }
@@ -148,12 +175,14 @@ fun MainScreen(
                     ) {
                         Text(
                             text = "Henüz hiç görev eklemedin.",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Sağ alttaki + butonuna basarak ilk görevi oluşturabilirsin.",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -268,17 +297,41 @@ private fun TaskFilterBar(
         Button(
             onClick = { onTabSelected(TaskFilterTab.ACTIVE) },
             modifier = Modifier.weight(1f),
-            enabled = !activeSelected // seçiliyken pasif gösteriyoruz
+            enabled = !activeSelected,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (activeSelected)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.primary
+            )
         ) {
-            Text("Aktif Görevler")
+            Text(
+                text = "Aktif Görevler",
+                color = if (activeSelected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onPrimary
+            )
         }
 
         Button(
             onClick = { onTabSelected(TaskFilterTab.OVERDUE) },
             modifier = Modifier.weight(1f),
-            enabled = !overdueSelected
+            enabled = !overdueSelected,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (overdueSelected)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.primary
+            )
         ) {
-            Text("Geçmiş Görevler")
+            Text(
+                text = "Geçmiş Görevler",
+                color = if (overdueSelected)
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                else
+                    MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
@@ -344,7 +397,10 @@ private fun MainTaskItem(
         onClick = onCardClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -359,7 +415,8 @@ private fun MainTaskItem(
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (progress != null) {
@@ -370,7 +427,9 @@ private fun MainTaskItem(
                     ) {
                         LinearProgressIndicator(
                             progress = { progress },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     }
                 }
@@ -387,14 +446,16 @@ private fun MainTaskItem(
                     task.startDateText?.let {
                         Text(
                             text = "Başlangıç: $it",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     task.endDateText?.let {
                         Text(
                             text = "Bitiş: $it",
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -403,7 +464,8 @@ private fun MainTaskItem(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = task.description,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -415,7 +477,8 @@ private fun MainTaskItem(
                         Text(
                             text = progressText,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         // Only-Done tipinde toggle butonu (subTask yokken)
@@ -429,7 +492,11 @@ private fun MainTaskItem(
                                     } else {
                                         Icons.Outlined.CheckCircle
                                     },
-                                    contentDescription = "Görev tamamlandı mı?"
+                                    contentDescription = "Görev tamamlandı mı?",
+                                    tint = if (task.isDone) 
+                                        MaterialTheme.colorScheme.primary 
+                                    else 
+                                        MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -443,16 +510,26 @@ private fun MainTaskItem(
                 if (subTasks.isEmpty()) {
                     Text(
                         text = "Bu görevin henüz alt görevi yok.",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    TextButton(onClick = onAddSubTaskClick) {
+                    TextButton(
+                        onClick = onAddSubTaskClick,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Alt görev ekle")
+                        Text(
+                            text = "Alt görev ekle",
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 } else {
                     Column(
@@ -499,7 +576,8 @@ private fun SelectedMainTaskDetailPanel(
         if (task == null) {
             Text(
                 text = "Bir göreve tıklayınca alt görevleri burada göreceksin.",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             return
         }
@@ -508,7 +586,8 @@ private fun SelectedMainTaskDetailPanel(
             text = "Seçili görev: ${task.title}",
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         val subTasks = task.subTasks.orEmpty()
@@ -517,16 +596,26 @@ private fun SelectedMainTaskDetailPanel(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Bu görevin henüz alt görevi yok.",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(4.dp))
-            TextButton(onClick = onAddSubTaskClick) {
+            TextButton(
+                onClick = onAddSubTaskClick,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Alt görev ekle")
+                Text(
+                    text = "Alt görev ekle",
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         } else {
             Spacer(modifier = Modifier.height(8.dp))
@@ -569,7 +658,10 @@ private fun SubTaskCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -583,7 +675,8 @@ private fun SubTaskCard(
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -600,7 +693,11 @@ private fun SubTaskCard(
                                     Icons.Outlined.CheckCircle
                                 },
                                 contentDescription = "Alt görev tamamlandı mı?",
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
+                                tint = if (subTask.isDone) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -631,12 +728,15 @@ private fun SubTaskCard(
                                     if (target > 0) current.toFloat() / target else 0f
                                 LinearProgressIndicator(
                                     progress = { ratio.coerceIn(0f, 1f) },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "$current / $target",
-                                    style = MaterialTheme.typography.labelSmall
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
 
@@ -661,14 +761,16 @@ private fun SubTaskCard(
                             Icon(
                                 imageVector = Icons.Default.Home,
                                 contentDescription = "Zamanlayıcı",
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             val current = subTask.currentMinutes ?: 0
                             val target = subTask.targetMinutes ?: 0
                             Text(
                                 text = "$current / $target dk",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -681,9 +783,197 @@ private fun SubTaskCard(
                     text = subTask.description,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
+}
+
+
+/**
+ * MainScreen için light tema önizlemesi.
+ */
+@Preview(
+    name = "MainScreen - Nature Light",
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable
+fun MainScreenLightPreview() {
+    AppTheme(darkTheme = false) {
+        MainScreen(
+            state = Main_screen_state(), // Varsayılan, boş state. İstersen burada örnek task listesi doldurabilirsin.
+            onRefresh = {},
+            onMainTaskClick = {},
+            onToggleMainTaskDone = {},
+            onAddSubTaskClick = {},
+            onAddMainTaskClick = {}
+        )
+    }
+}
+
+/**
+ * MainScreen için dark tema önizlemesi.
+ */
+@Preview(
+    name = "MainScreen - Nature Dark",
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun MainScreenDarkPreview() {
+    AppTheme(darkTheme = true) {
+        MainScreen(
+            state = Main_screen_state(),
+            onRefresh = {},
+            onMainTaskClick = {},
+            onToggleMainTaskDone = {},
+            onAddSubTaskClick = {},
+            onAddMainTaskClick = {}
+        )
+    }
+}
+@Preview(
+    name = "MainScreen - Nature Light (Sample Data)",
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable
+fun MainScreenSampleLightPreview() {
+    AppTheme(darkTheme = false) {
+        MainScreen(
+            state = sampleMainScreenState(),
+            onRefresh = {},
+            onMainTaskClick = {},
+            onToggleMainTaskDone = {},
+            onAddSubTaskClick = {},
+            onAddMainTaskClick = {}
+        )
+    }
+}
+
+@Preview(
+    name = "MainScreen - Nature Dark (Sample Data)",
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun MainScreenSampleDarkPreview() {
+    AppTheme(darkTheme = true) {
+        MainScreen(
+            state = sampleMainScreenState(),
+            onRefresh = {},
+            onMainTaskClick = {},
+            onToggleMainTaskDone = {},
+            onAddSubTaskClick = {},
+            onAddMainTaskClick = {}
+        )
+    }
+}
+
+// İLK KEZ: Preview’de kullanılacak sahte state
+private fun sampleMainScreenState(): Main_screen_state {
+    // BURASI ÖNEMLİ:
+    // Main_task_ui_model ve Sub_task_ui_model'in constructor'ını
+    // kendi projendeki tanıma göre named parametrelerle doldur.
+    // Aşağıdaki örnek şemayı kendi data class'ına uyarlaman yeterli.
+
+    val subTasksForFirst = listOf(
+        Sub_task_ui_model(
+            id = 101L,
+            title = "Giriş kısmını oku",
+            description = "Kitabın ilk 10 sayfası",
+            taskType = Task_type_ui.Done,
+            isDone = false,
+            currentCount = 4,
+            targetCount = 10,
+            currentMinutes = null,
+            targetMinutes = null,
+            mainTaskId = 1,
+            startDateText = TODO(),
+            endDateText = TODO()
+        ),
+        Sub_task_ui_model(
+            id = 102L,
+            title = "Alıştırmaları çöz",
+            description = "En az 5 soru",
+            taskType = Task_type_ui.Count,   // Count ise senin yapına göre argüman eklemen gerekebilir
+            isDone = false,
+            currentCount = 2,
+            targetCount = 5,
+            currentMinutes = null,
+            targetMinutes = null,
+            mainTaskId = 1L,
+            startDateText ="10.12.2023",
+            endDateText ="10.12.2029"
+        )
+    )
+
+    val upcoming = listOf(
+        Main_task_ui_model(
+            id = 1L,
+            title = "İngilizce Çalış",
+            description = "Her gün en az 30 dk okuma",
+            hasSubTasks = true,
+            totalSubTaskCount = subTasksForFirst.size,
+            doneSubTaskCount = 1,
+            taskType = Task_type_ui.Time,    // kendi sealed class yapına göre ayarla
+            targetCount = null,
+            currentCount = null,
+            targetMinutes = 300,
+            currentMinutes = 60,
+            isDone = false,
+            startDateText = "06.12.2025",
+            endDateText = "31.12.2025",
+            subTasks = subTasksForFirst
+        ),
+        Main_task_ui_model(
+            id = 2L,
+            title = "Spor",
+            description = "Haftada 3 gün yürüyüş",
+            hasSubTasks = false,
+            totalSubTaskCount = 0,
+            doneSubTaskCount = 0,
+            taskType = Task_type_ui.Done,
+            targetCount = null,
+            currentCount = null,
+            targetMinutes = null,
+            currentMinutes = null,
+            isDone = false,
+            startDateText = "05.12.2025",
+            endDateText = null,
+            subTasks = emptyList()
+        )
+    )
+
+    val overdue = listOf(
+        Main_task_ui_model(
+            id = 3L,
+            title = "Veri Yapıları Not Çıkarma",
+            description = "Stack, Queue, Linked List",
+            hasSubTasks = false,
+            totalSubTaskCount = 0,
+            doneSubTaskCount = 0,
+            taskType = Task_type_ui.Count,
+            targetCount = 10,
+            currentCount = 7,
+            targetMinutes = null,
+            currentMinutes = null,
+            isDone = false,
+            startDateText = "01.12.2025",
+            endDateText = "03.12.2025",
+            subTasks = emptyList()
+        )
+    )
+
+    return Main_screen_state(
+        isLoading = false,
+        errorMessage = null,
+        upcomingOrNoDeadlineMainTasks = upcoming,
+        overdueMainTasks = overdue
+    )
 }
